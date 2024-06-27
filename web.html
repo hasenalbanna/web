@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Competition</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            margin-top: 20px;
+            color: #444;
+        }
+        .upload-form {
+            margin: 20px;
+        }
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px;
+        }
+        .image-container img {
+            max-width: 45%;
+            margin: 0 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .vote-button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .vote-button:hover {
+            background-color: #0056b3;
+        }
+        .vote-count {
+            margin: 20px;
+            font-size: 1.2em;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Photo Competition</h1>
+    
+    <div class="upload-form">
+        <input type="file" id="imageUpload" accept="image/*" multiple>
+        <button onclick="uploadImages()" class="vote-button">Upload Images</button>
+    </div>
+    
+    <div class="image-container">
+        <img id="image1" src="" alt="Image 1">
+        <img id="image2" src="" alt="Image 2">
+    </div>
+    
+    <div>
+        <button onclick="voteForImage(1)" class="vote-button">Vote for Image 1</button>
+        <button onclick="voteForImage(2)" class="vote-button">Vote for Image 2</button>
+    </div>
+    
+    <div class="vote-count" id="voteCount"></div>
+
+    <script>
+        let images = [];
+        let votes = {};
+        let currentIndex = 0;
+
+        function uploadImages() {
+            const fileInput = document.getElementById('imageUpload');
+            const files = fileInput.files;
+            if (files.length > 0) {
+                for (let i = 0; i < files.length; i++) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imageUrl = event.target.result;
+                        images.push(imageUrl);
+                        votes[imageUrl] = 0;
+                        if (images.length === 2) {
+                            displayImages();
+                        }
+                    };
+                    reader.readAsDataURL(files[i]);
+                }
+            }
+        }
+
+        function displayImages() {
+            document.getElementById('image1').src = images[currentIndex % images.length];
+            document.getElementById('image2').src = images[(currentIndex + 1) % images.length];
+            updateVoteCount();
+        }
+
+        function voteForImage(imageIndex) {
+            const selectedImage = images[(currentIndex + imageIndex - 1) % images.length];
+            votes[selectedImage]++;
+            currentIndex++;
+            if (currentIndex >= images.length - 1) {
+                declareWinner();
+            } else {
+                displayImages();
+            }
+        }
+
+        function updateVoteCount() {
+            let voteCountText = 'Current Votes:\n';
+            for (let imageUrl in votes) {
+                voteCountText += `${imageUrl.substring(0, 30)}...: ${votes[imageUrl]} votes\n`;
+            }
+            document.getElementById('voteCount').innerText = voteCountText;
+        }
+
+        function declareWinner() {
+            let maxVotes = 0;
+            let winnerImage = '';
+            for (let imageUrl in votes) {
+                if (votes[imageUrl] > maxVotes) {
+                    maxVotes = votes[imageUrl];
+                    winnerImage = imageUrl;
+                }
+            }
+            document.getElementById('voteCount').innerText = `Winner: ${winnerImage.substring(0, 30)}... with ${maxVotes} votes`;
+        }
+    </script>
+</body>
+</html>
